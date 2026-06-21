@@ -160,6 +160,24 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           sendResponse({ ok: true });
           break;
         }
+        case 'APPROVAL_RESPONSE': {
+          try {
+            await handleApprovalResponse(msg.taskId, msg.decision);
+            sendResponse({ ok: true });
+          } catch (e) {
+            sendResponse({ ok: false, error: e.message });
+          }
+          break;
+        }
+        case 'ASK_USER_ANSWER': {
+          try {
+            await handleAskUserAnswer(msg.taskId, msg.answer);
+            sendResponse({ ok: true });
+          } catch (e) {
+            sendResponse({ ok: false, error: e.message });
+          }
+          break;
+        }
         case 'OPEN_SIDEBAR': {
           try { await chrome.sidePanel.open({ tabId: msg.tabId }); sendResponse({ ok: true }); }
           catch (e) { sendResponse({ ok: false, error: e.message }); }
@@ -473,15 +491,20 @@ async function loop() {
     try {
       const liveSettings = await getSettings();
       if (liveSettings.confirmationMode === 'always-allow' || (task.settings && task.settings.confirmationMode === 'always-allow')) {
-        const r = await agent.handleApprovalResponse('allow-once');
-        if (r && r.status === 'executing_tool') {
-          await agent.executeTool();
+        if (!state.pendingToolCall) {
+          state.status = 'running';
+        } else {
+          const r = await agent.handleApprovalResponse('allow-once');
+          if (r && r.status === 'executing_tool') {
+            await agent.executeTool();
+          }
         }
       } else {
         return; // wait for user response
       }
     } catch (e) {
       console.error('[webnav] auto-approval failed', e);
+      try { await agent.abort({ kind: 'error', message: e.message }); } catch {}
       releaseTask();
       return;
     }
@@ -572,7 +595,7 @@ async function handleAskUserAnswer(taskId, answer) {
 
 function sendMessageError(error) {
   // Best-effort: tell all listeners the request was rejected.
-  try { chrome.runtime.sendMessage({ kind: 'error', error }).catch(() => {}); } catch {}
+  broadcastAll({ kind: 'error', error });
 }
 
 async function restoreTaskById(taskId) {

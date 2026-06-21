@@ -145,12 +145,8 @@
     els.activity.scrollTop = els.activity.scrollHeight;
   }
 
-  let thinkAnimTimer = null;
-  let thinkPhrases = [];
-
   function setPill(status, phrase) {
     const terminal = ['done', 'aborted', 'error'].includes(status);
-    if (thinkAnimTimer) { clearInterval(thinkAnimTimer); thinkAnimTimer = null; }
     if (terminal || !status || status === 'idle') {
       els.pill.className = 'pill ' + (status || 'idle');
       els.pill.textContent = status || 'idle';
@@ -208,8 +204,6 @@
       appendActivity('. Task started: ' + truncate(msg.goal, 80));
     } else if (msg.kind === 'thinking') {
       setPill('running', msg.phrase || 'Thinking...');
-      // Show the thinking phrase in the chat so the user sees what the AI is up to.
-      appendChat('status', '🤔 ' + (msg.phrase || 'The AI is thinking...'));
     } else if (msg.kind === 'model_message') {
       // Free text the model emitted (commentary / thinking) before or without a tool call.
       if (msg.text && msg.text.trim()) appendChat('assistant', msg.text);
@@ -287,10 +281,12 @@
       '<div class="muted">' + escapeHtml(truncate(JSON.stringify(msg.call.args), 200)) + '</div>' +
       '<div class="row">' +
         '<button class="primary small" data-act="allow-once">Allow</button>' +
+        (showAlways ? '<button class="primary small" data-act="allow-always">Allow always</button>' : '') +
         '<button class="ghost small" data-act="deny">Deny</button>' +
       '</div>';
     els.approvalsList.prepend(card);
     card.querySelector('[data-act="allow-once"]').addEventListener('click', () => respondApproval('allow-once'));
+    if (showAlways) card.querySelector('[data-act="allow-always"]').addEventListener('click', () => respondApproval('allow-always'));
     card.querySelector('[data-act="deny"]').addEventListener('click', () => respondApproval('deny'));
     updateApprovalsCount();
 
@@ -308,9 +304,13 @@
     els.modal.classList.add('hidden');
   }
 
-  function respondApproval(decision) {
+  async function respondApproval(decision) {
     if (!currentTaskId) { closeApproval(); return; }
-    if (port) port.postMessage({ type: 'APPROVAL_RESPONSE', taskId: currentTaskId, decision });
+    const r = await send('APPROVAL_RESPONSE', { taskId: currentTaskId, decision });
+    if (!r || !r.ok) {
+      appendActivity('X Approval failed: ' + (r ? r.error : 'unknown error'), 'error');
+      return; // Do not close modal if it failed
+    }
     appendActivity((decision === 'deny' ? 'X Denied' : '.v Allowed') + ': ' + (currentCall && currentCall.tool), decision === 'deny' ? 'warn' : 'ok');
     closeApproval();
     const cards = els.approvalsList.querySelectorAll('.approval-card');
@@ -365,12 +365,11 @@
       closeAskUser();
       return;
     }
-    if (!port) {
-      // Reconnect, then retry once.
-      connect();
-      await new Promise(r => setTimeout(r, 300));
+    const r = await send('ASK_USER_ANSWER', { taskId: currentTaskId, answer: text });
+    if (!r || !r.ok) {
+      appendActivity('X Send failed: ' + (r ? r.error : 'unknown error'), 'error');
+      return;
     }
-    if (port) port.postMessage({ type: 'ASK_USER_ANSWER', taskId: currentTaskId, answer: text });
     appendChat('user', '(reply) ' + text);
     closeAskUser();
   });
