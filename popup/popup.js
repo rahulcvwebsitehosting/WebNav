@@ -50,11 +50,15 @@
   // Periodically re-fetch the current task — port can be torn down when SW restarts.
   setInterval(async () => {
     try {
-      // Get the active tab so we poll the right task.
       const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
       const activeTabId = tabs[0] && tabs[0].id;
-      const r = await send('GET_CURRENT_TASK', activeTabId ? { tabId: activeTabId } : {});
-      const t = r && r.task;
+      let r = await send('GET_CURRENT_TASK', activeTabId ? { tabId: activeTabId } : {});
+      let t = r && r.task;
+      // Fallback: if active tab has no task, check any running task
+      if (!t) {
+        r = await send('GET_CURRENT_TASK', {});
+        t = r && r.task;
+      }
       if (t && (!currentTask || currentTask.id !== t.id || currentTask.status !== t.status)) {
         currentTask = t;
         if (t.status === 'done' || t.status === 'aborted' || t.status === 'error') {
@@ -238,9 +242,8 @@
 
   $('stop-btn').addEventListener('click', async () => {
     try {
-      const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-      const activeTabId = tabs[0] && tabs[0].id;
-      await send('STOP_TASK', activeTabId ? { tabId: activeTabId } : {});
+      const tabId = currentTask ? currentTask.tabId : null;
+      await send('STOP_TASK', tabId ? { tabId } : {});
       $('status-text').textContent = 'Stopped';
     } catch {}
   });

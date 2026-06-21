@@ -406,7 +406,6 @@
       // Refresh the tab strip status
       await refreshTabStrip();
 
-      // Update the pill for the currently selected tab
       if (selectedTabId != null) {
         const r = await send('GET_CURRENT_TASK', { tabId: selectedTabId });
         const t = r && r.task;
@@ -414,7 +413,6 @@
           currentTaskId = t.id;
           setPill(t.status, (t.state && t.state.thinking) || null);
           updateCounters(t.counters || {});
-          // Update session status
           const sess = getOrCreateSession(selectedTabId);
           sess.taskStatus = t.status;
           sess.taskId = t.id;
@@ -425,7 +423,6 @@
             updateApprovalsCount();
           }
         } else {
-          // No task on this tab
           const sess = tabSessions.get(selectedTabId);
           const wasRunning = sess && ['running', 'awaiting_approval', 'awaiting_user'].includes(sess.taskStatus);
           if (wasRunning) {
@@ -436,6 +433,13 @@
               els.approvalsEmpty.classList.remove('hidden');
               updateApprovalsCount();
             }
+          }
+          // Show indicator if a task is running on a different tab
+          const anyTask = await send('GET_CURRENT_TASK');
+          if (anyTask && anyTask.task && anyTask.task.tabId !== selectedTabId) {
+            const otherTab = _tabStripData.find(td => td.tabId === anyTask.task.tabId);
+            const hint = (otherTab && otherTab.title) || 'another tab';
+            setPill('running', 'AI active on "' + truncate(hint, 30) + '"');
           }
         }
       }

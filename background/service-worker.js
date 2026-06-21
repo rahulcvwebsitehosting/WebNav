@@ -180,7 +180,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         case 'START_TASK': {
           // tabId can come from the message (sidebar sends selectedTabId)
           // or fall back to the sender's tab (content script) or active tab.
-          const senderTabId = (sender && sender.tab && sender.tab.id) || msg.tabId || null;
+          const senderTabId = msg.tabId || (sender && sender.tab && sender.tab.id) || null;
           const r = await startTask(msg.goal, msg.profileId, senderTabId);
           sendResponse(r);
           break;
