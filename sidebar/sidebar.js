@@ -183,10 +183,20 @@
         if (currentTaskId !== t.id) currentTaskId = t.id;
         setPill(t.status, (t.state && t.state.thinking) || null);
         updateCounters(t.counters || {});
+        if (t.status !== 'awaiting_approval' && els.approvalsList.children.length > 0) {
+          els.approvalsList.innerHTML = '';
+          els.approvalsEmpty.classList.remove('hidden');
+          updateApprovalsCount();
+        }
       } else if (currentTaskId) {
         // Task was cleared
         setPill('idle');
         currentTaskId = null;
+        if (els.approvalsList.children.length > 0) {
+          els.approvalsList.innerHTML = '';
+          els.approvalsEmpty.classList.remove('hidden');
+          updateApprovalsCount();
+        }
       }
     } catch {}
   }, 1500);
@@ -235,6 +245,9 @@
       appendChat('assistant', msg.answer || '');
       appendActivity('.v Task complete', 'ok');
       closeApproval();
+      els.approvalsList.innerHTML = '';
+      els.approvalsEmpty.classList.remove('hidden');
+      updateApprovalsCount();
     } else if (msg.kind === 'aborted' || msg.kind === 'error') {
       const errMsg = (msg.error && msg.error.message) || '';
       setPill(msg.kind);
@@ -245,6 +258,9 @@
       }
       appendActivity((msg.kind === 'aborted' ? '.x Aborted: ' : 'X Error: ') + errMsg, 'error');
       closeApproval();
+      els.approvalsList.innerHTML = '';
+      els.approvalsEmpty.classList.remove('hidden');
+      updateApprovalsCount();
     }
   }
 
