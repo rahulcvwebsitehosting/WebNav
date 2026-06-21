@@ -140,7 +140,9 @@ To download and run a pre-packaged build:
 
 ## 🤝 Contributing (Open Source)
 
-WebNav is 100% open source. We welcome pull requests!
+WebNav is 100% open source, built with ❤️ for the developer community. No subscriptions, no cloud lock-in, no data leaving your machine — just pure, transparent, local AI browsing autonomy. I built this so every developer can experiment with and deploy browser agents without paying a cent or trusting a third party.
+
+We welcome pull requests!
 
 **Good First Issues:**
 - Adding new models to the prompt parser.
@@ -150,4 +152,16 @@ WebNav is 100% open source. We welcome pull requests!
 ## 📄 License
 
 This project is licensed under the **MIT License**. Build on top of it, modify it, and make the web yours.
+
+---
+
+## 👨‍💻 About the Creator
+
+**Rahul Shyam CV** — Independent developer and open-source enthusiast building tools that put AI autonomy back into developers' hands.
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/rahulshyamcivil/)
+[![X / Twitter](https://img.shields.io/badge/X-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/RahulShyamCV)
+[![Threads](https://img.shields.io/badge/Threads-000000?style=for-the-badge&logo=threads&logoColor=white)](https://www.threads.com/@rahulcvjps)
+
+> *"I believe the future of browsing is agent-first, local-first, and open-source. WebNav is my contribution to that future — free, transparent, and built for developers by a developer."*
 
