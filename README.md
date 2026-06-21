@@ -126,6 +126,18 @@ The agent interacts with the page using a highly restrictive, deterministic tool
 ]
 ```
 
+## 📦 Releases & Automated Builds
+
+We use GitHub Actions to automate extension packaging and releases. Whenever a new tag starting with `v` (e.g. `v0.1.0`) is pushed to the repository, a release zip file containing the unpacked extension is compiled and attached directly to the [GitHub Releases](https://github.com/rahulcvwebsitehosting/WebNav/releases) page.
+
+To download and run a pre-packaged build:
+1. Head over to the **Releases** page on GitHub.
+2. Download the `webnav-extension-vX.Y.Z.zip` file from the latest release.
+3. Unzip the archive.
+4. Go to `chrome://extensions/` in Chrome, enable **Developer mode**, click **Load unpacked**, and select the extracted folder.
+
+---
+
 ## 🤝 Contributing (Open Source)
 
 WebNav is 100% open source. We welcome pull requests!
@@ -138,3 +150,4 @@ WebNav is 100% open source. We welcome pull requests!
 ## 📄 License
 
 This project is licensed under the **MIT License**. Build on top of it, modify it, and make the web yours.
+

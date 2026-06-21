@@ -1,0 +1,45 @@
+name: Build and Release Extension
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Get Version
+        id: get_version
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/}"
+          else
+            VERSION="v$(jq -r '.version' manifest.json)"
+          fi
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "tag=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Build Extension Zip
+        run: |
+          zip -r webnav-extension-${{ env.VERSION }}.zip manifest.json background content data icons lib options popup sidebar README.md
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: webnav-extension-${{ env.VERSION }}.zip
+          tag_name: ${{ env.VERSION }}
+          name: Release ${{ env.VERSION }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
