@@ -50,15 +50,15 @@
   // Periodically re-fetch the current task — port can be torn down when SW restarts.
   setInterval(async () => {
     try {
-      const r = await send('GET_CURRENT_TASK');
+      // Get the active tab so we poll the right task.
+      const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+      const activeTabId = tabs[0] && tabs[0].id;
+      const r = await send('GET_CURRENT_TASK', activeTabId ? { tabId: activeTabId } : {});
       const t = r && r.task;
       if (t && (!currentTask || currentTask.id !== t.id || currentTask.status !== t.status)) {
         currentTask = t;
         if (t.status === 'done' || t.status === 'aborted' || t.status === 'error') {
           handleEvent({ kind: t.status, error: t.state && t.state.error, answer: t.state && t.state.finalAnswer });
-          // Terminal task: drop our cached copy and restore the Run UI so the
-          // user can start a new task. (The SW also clears currentTask on
-          // terminal, so future polls see no task.)
           currentTask = null;
           enterInputMode();
         } else {
@@ -110,8 +110,10 @@
         port.postMessage({ type: 'GET_STATUS' });
       } catch (e) { console.warn('port failed', e); }
 
-      // Check current task
-      const ctResp = await send('GET_CURRENT_TASK');
+      // Check current task on the active tab
+      const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+      const activeTabId = tabs[0] && tabs[0].id;
+      const ctResp = await send('GET_CURRENT_TASK', activeTabId ? { tabId: activeTabId } : {});
       const ct = ctResp && ctResp.task;
       if (ct && !['done', 'aborted', 'error'].includes(ct.status)) {
         enterRunningMode(ct);
@@ -235,8 +237,12 @@
   });
 
   $('stop-btn').addEventListener('click', async () => {
-    await send('STOP_TASK');
-    $('status-text').textContent = 'Stopped';
+    try {
+      const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+      const activeTabId = tabs[0] && tabs[0].id;
+      await send('STOP_TASK', activeTabId ? { tabId: activeTabId } : {});
+      $('status-text').textContent = 'Stopped';
+    } catch {}
   });
 
   $('go-sidebar-btn').addEventListener('click', openSidebar);

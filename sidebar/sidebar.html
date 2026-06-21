@@ -16,6 +16,14 @@
     <div class="head-actions"></div>
   </header>
 
+  <!-- ── Tab Sessions Strip ─────────────────────────────────────────────── -->
+  <div class="tab-sessions-bar" id="tab-sessions-bar">
+    <div class="tab-sessions-list" id="tab-sessions-list">
+      <!-- Populated by sidebar.js -->
+    </div>
+    <button class="tab-sessions-refresh" id="tab-sessions-refresh" title="Refresh tab list">↺</button>
+  </div>
+
   <nav class="tabs">
     <button data-pane="chat" class="tab active">Chat</button>
     <button data-pane="activity" class="tab">Activity</button>
@@ -25,11 +33,12 @@
   <main>
     <section id="pane-chat" class="pane active chat-pane">
       <div id="chat-log" class="chat-log"></div>
-      <div id="chat-empty" class="empty">Type a task below to get started (e.g. "open youtube and search for lofi music").</div>
+      <div id="chat-empty" class="empty">Select a tab above, then type a task below.<br><span class="empty-sub">(e.g. "open youtube and search for lofi music")</span></div>
       <div class="chat-composer">
         <div class="composer-toolbar">
           <select id="sidebar-profile-select" class="profile-select-sm" title="Active profile"></select>
           <a href="#" id="sidebar-open-options" class="settings-link" title="Manage profiles in Options">⚙</a>
+          <button id="link-toggle-btn" class="ghost small link-ctx-btn" title="Toggle multi-tab linking mode. When active, click tab pills to link/unlink them for shared AI context.">🔗 Link</button>
         </div>
         <div class="composer-input-row">
           <textarea id="chat-input" rows="1" placeholder="Type a task..." class="composer-input"></textarea>
