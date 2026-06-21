@@ -1,0 +1,161 @@
+{
+  "version": "2026-06-13",
+  "categories": {
+    "banking": {
+      "description": "Banking and financial institution login portals",
+      "patterns": [
+        "chase.com",
+        "bankofamerica.com",
+        "wellsfargo.com",
+        "citi.com",
+        "usbank.com",
+        "capitalone.com",
+        "pnc.com",
+        "tdbank.com",
+        "ally.com",
+        "schwab.com",
+        "fidelity.com",
+        "vanguard.com",
+        "hsbc.com",
+        "barclays.co.uk",
+        "lloydsbank.com",
+        "natwest.com",
+        "santander.com",
+        "ing.com",
+        "deutschebank.de",
+        "bnpparibas.com",
+        "societegenerale.com",
+        "credit-suisse.com",
+        "ubs.com",
+        "rbc.com",
+        "scotiabank.com",
+        "bmo.com",
+        "cibc.com",
+        "anz.com",
+        "commbank.com.au",
+        "westpac.com.au",
+        "nab.com.au"
+      ]
+    },
+    "payment": {
+      "description": "Payment processor dashboards and checkout backends",
+      "patterns": [
+        "dashboard.paypal.com",
+        "dashboard.stripe.com",
+        "braintreepayments.com",
+        "adyen.com",
+        "squareup.com",
+        "checkout.com",
+        "klarna.com",
+        "afterpay.com",
+        "affirm.com",
+        "wise.com",
+        "remitly.com",
+        "venmo.com",
+        "cashapp.com",
+        "zelle.com"
+      ]
+    },
+    "crypto": {
+      "description": "Cryptocurrency exchanges, custody, and wallets",
+      "patterns": [
+        "coinbase.com",
+        "binance.com",
+        "kraken.com",
+        "gemini.com",
+        "crypto.com",
+        "bitstamp.net",
+        "bitfinex.com",
+        "okx.com",
+        "kucoin.com",
+        "bybit.com",
+        "metamask.io",
+        "ledger.com",
+        "trezor.io",
+        "blockchain.com",
+        "electrum.org",
+        "phantom.app"
+      ]
+    },
+    "government": {
+      "description": "Government portals and tax systems",
+      "patterns": [
+        "irs.gov",
+        "hmrc.gov.uk",
+        "gov.uk",
+        "usa.gov",
+        "europa.eu",
+        "gouv.fr",
+        "bund.de",
+        "cra-arc.gc.ca",
+        "ato.gov.au",
+        "ird.govt.nz",
+        "agenziaentrate.gov.it",
+        "aeat.es",
+        "finances.gouv.fr",
+        "service.gov.au",
+        "my.gov.au",
+        "nidirect.gov.uk",
+        "revenue.ie",
+        "skatteverket.se"
+      ]
+    },
+    "medical": {
+      "description": "Health portals and insurance",
+      "patterns": [
+        "mychart.com",
+        "epic.com",
+        "cerner.com",
+        "aetna.com",
+        "anthem.com",
+        "unitedhealthcare.com",
+        "cigna.com",
+        "humana.com",
+        "kaiserpermanente.org",
+        "bcbs.com",
+        "nhs.uk",
+        "healthline.com",
+        "webmd.com",
+        "mayoclinic.org",
+        "clevelandclinic.org"
+      ]
+    },
+    "identity": {
+      "description": "Single sign-on and identity providers",
+      "patterns": [
+        "accounts.google.com",
+        "login.microsoftonline.com",
+        "okta.com",
+        "auth0.com",
+        "onelogin.com",
+        "login.yahoo.com",
+        "appleid.apple.com",
+        "facebook.com",
+        "linkedin.com",
+        "twitter.com",
+        "x.com",
+        "github.com",
+        "gitlab.com",
+        "bitbucket.org"
+      ]
+    },
+    "cloud_console": {
+      "description": "Cloud provider consoles and infrastructure",
+      "patterns": [
+        "console.aws.amazon.com",
+        "portal.azure.com",
+        "console.cloud.google.com",
+        "console.digitalocean.com",
+        "cloud.linode.com",
+        "cloudflare.com",
+        "heroku.com",
+        "render.com",
+        "vercel.com",
+        "netlify.com",
+        "fly.io",
+        "scaleway.com",
+        "ovh.com"
+      ]
+    }
+  }
+}

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>WebNav Options</title>
+  <link rel="stylesheet" href="options.css" />
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="dot"></span>
+      <strong>WebNav</strong>
+    </div>
+    <div id="global-error" class="banner error hidden" style="margin:8px 18px 0 18px"></div>
+  </header>
+
+  <div id="first-run-banner" class="banner firstrun hidden">
+    <strong>Welcome.</strong> Pick how WebNav should treat domains for this browser.
+    <div class="row" style="margin-top:6px">
+      <select id="first-run-mode">
+        <option value="allow-all-non-blocked">Allow all domains except built-in protected ones</option>
+        <option value="explicit-allow">Require an explicit allow list</option>
+        <option value="confirm-per-domain">Ask for the allowed domains at the start of each task</option>
+        <option value="allow-all">⚠ Allow ALL websites without restrictions</option>
+      </select>
+      <button id="first-run-save" class="primary">Save</button>
+    </div>
+  </div>
+
+  <nav class="tabs">
+    <button data-tab="profiles" class="tab active">Profiles</button>
+    <button data-tab="allowlist" class="tab">Allowlist</button>
+    <button data-tab="safety" class="tab">Safety</button>
+    <button data-tab="snapshots" class="tab">Snapshots</button>
+    <button data-tab="history" class="tab">History</button>
+  </nav>
+
+  <main>
+    <section id="tab-profiles" class="tab-pane active">
+      <div class="row">
+        <button id="add-profile" class="primary">+ Add profile</button>
+      </div>
+      <div id="profile-form" class="card hidden">
+        <h3>Profile</h3>
+        <div class="row">
+          <label>Provider
+            <select id="pf-provider">
+              <option value="local">Local Ollama (localhost)</option>
+              <option value="cloud">Ollama Cloud (ollama.com)</option>
+              <option value="openrouter">OpenRouter API</option>
+              <option value="opencode-zen">OpenCode Zen</option>
+              <option value="gemini">Gemini API</option>
+              <option value="custom">Custom OpenAI-compatible (vLLM, LM Studio, ...)</option>
+            </select>
+          </label>
+          <label>Name <input id="pf-name" type="text" placeholder="My Ollama" /></label>
+        </div>
+        <div class="row">
+          <label>Base URL <input id="pf-base" type="text" placeholder="http://localhost:11434/v1  or  https://ollama.com/v1  or  https://openrouter.ai/api/v1" /></label>
+        </div>
+        <div class="row">
+          <label>API key <input id="pf-key" type="password" placeholder="Required for cloud APIs (sk-…, ollama_…)" /></label>
+          <label style="flex:0 0 auto; min-width:0;">
+            <span style="opacity:0">x</span>
+            <button id="pf-fetch-models" class="ghost" type="button" title="List available models from the catalog. The catalog is public and does NOT verify your API key — use Test connection for that.">⟳ Fetch models</button>
+          </label>
+        </div>
+        <div class="row">
+          <label>Model
+            <div style="display:flex;gap:6px;align-items:center;">
+              <select id="pf-model-select" style="flex:1"><option value="">— fetch models first —</option></select>
+              <input id="pf-model-custom" type="text" placeholder="or type manually" style="flex:1" />
+            </div>
+          </label>
+        </div>
+        <div id="pf-model-status" class="muted" style="margin:2px 0 4px 0;"></div>
+        <div class="row">
+          <label>Temperature <input id="pf-temp" type="number" step="0.1" min="0" max="2" value="0.2" /></label>
+          <label>Max tokens <input id="pf-maxtokens" type="number" min="64" max="131072" value="4096" title="Maximum response tokens per model call. Increase if replies get cut off." /></label>
+          <label>Max steps <input id="pf-max" type="number" min="1" max="100" value="25" /></label>
+        </div>
+        <div class="row">
+          <label>Cost per 1k prompt tokens (USD) <input id="pf-pcost" type="number" step="0.0001" min="0" value="0" /></label>
+          <label>Cost per 1k completion tokens (USD) <input id="pf-ccost" type="number" step="0.0001" min="0" value="0" /></label>
+        </div>
+        <label class="check"><input id="pf-default" type="checkbox" /> Default profile</label>
+        <div class="row" style="margin-top:10px;">
+          <button id="pf-save" class="primary">Save</button>
+          <button id="pf-test" class="ghost" type="button" title="Sends a real chat request to verify your Base URL AND API key actually work.">Test connection</button>
+          <button id="pf-cancel" class="ghost">Cancel</button>
+        </div>
+      </div>
+      <div id="profile-list" class="list"></div>
+    </section>
+
+    <section id="tab-allowlist" class="tab-pane">
+      <div class="row">
+        <span class="muted">Mode:</span>
+        <select id="allowlist-mode">
+          <option value="allow-all-non-blocked">Allow all non-blocked (recommended)</option>
+          <option value="explicit-allow">Explicit allow list only</option>
+          <option value="confirm-per-domain">Confirm per task</option>
+          <option value="allow-all">⚠ Allow ALL websites (no restrictions)</option>
+        </select>
+      </div>
+      <div id="unrestricted-warning" class="banner firstrun hidden" style="margin:6px 0 12px 0;">
+        <strong>⚠ Unrestricted mode is ON.</strong> The agent will navigate to ANY website, including banking, payment, identity, and government sites. Built-in safety categories are disabled. Use only if you fully trust the agent and the model.
+      </div>
+      <h3>Allow patterns</h3>
+      <p class="muted">Examples: <code>example.com</code> &middot; <code>*.example.com</code> &middot; <code>https://example.com/account/</code></p>
+      <div class="row">
+        <input id="allow-input" type="text" placeholder="example.com" />
+        <button id="allow-add" class="primary">Add</button>
+      </div>
+      <ul id="allow-list" class="list"></ul>
+
+      <h3>Deny patterns</h3>
+      <div class="row">
+        <input id="deny-input" type="text" placeholder="tracking.example.com" />
+        <button id="deny-add" class="primary">Add</button>
+      </div>
+      <ul id="deny-list" class="list"></ul>
+
+      <h3>Built-in protected categories</h3>
+      <p class="muted">These categories are always blocked. To use the agent on a domain in a category, add an explicit override below. (Type the category name to confirm.)</p>
+      <div id="categories" class="categories"></div>
+    </section>
+
+    <section id="tab-safety" class="tab-pane">
+      <h3>Confirmation mode</h3>
+      <select id="conf-mode">
+        <option value="every">Confirm every action (R2+)</option>
+        <option value="destructive-only">Confirm destructive actions only (R3+)</option>
+        <option value="always-allow">Always allow — no approval prompts (AI can do anything)</option>
+      </select>
+
+      <h3>Loop detection</h3>
+      <label class="check"><input id="loop-enabled" type="checkbox" /> Enabled</label>
+      <div class="row">
+        <label>Same action limit <input id="loop-same" type="number" min="2" max="20" value="3" /></label>
+        <label>Sequence length <input id="loop-len" type="number" min="2" max="10" value="4" /></label>
+        <label>Sequence repetition limit <input id="loop-rep" type="number" min="2" max="10" value="2" /></label>
+      </div>
+
+      <h3>Secret redaction</h3>
+      <p class="muted">All rules are OFF by default. The model can read whatever is on the page until you opt in.</p>
+      <div id="redact-rules" class="rules"></div>
+
+      <h3>Injection filter sensitivity</h3>
+      <select id="inj-sens">
+        <option value="low">Low - fewer false positives</option>
+        <option value="medium" selected>Medium</option>
+        <option value="high">High - flags more</option>
+      </select>
+    </section>
+
+    <section id="tab-snapshots" class="tab-pane">
+      <h3>Snapshot caps</h3>
+      <div class="row">
+        <label>Max elements <input id="cap-elements" type="number" min="10" max="500" value="60" /></label>
+        <label>Max text length <input id="cap-text" type="number" min="20" max="500" value="80" /></label>
+        <label>Max iframes <input id="cap-iframes" type="number" min="0" max="50" value="5" /></label>
+        <label>Max shadow depth <input id="cap-shadow" type="number" min="0" max="5" value="2" /></label>
+        <label>Max textarea content <input id="cap-textarea" type="number" min="0" max="2000" value="200" /></label>
+        <label>Total snapshot bytes <input id="cap-bytes" type="number" min="2048" max="200000" value="20480" /></label>
+        <label>Cache size (tabs) <input id="cap-cache" type="number" min="1" max="100" value="20" /></label>
+      </div>
+      <label class="check"><input id="cap-highlight" type="checkbox" checked /> Highlight targeted elements</label>
+      <label class="check"><input id="cap-snapnav" type="checkbox" checked /> Always snapshot after navigation</label>
+    </section>
+
+    <section id="tab-history" class="tab-pane">
+      <div class="row">
+        <button id="history-export" class="ghost">Export all</button>
+        <button id="history-clear" class="danger">Delete all</button>
+        <span class="muted" id="history-size"></span>
+      </div>
+      <table class="history-table">
+        <thead>
+          <tr><th>Date</th><th>Goal</th><th>Status</th><th>Steps</th><th>Calls</th><th>Tokens</th><th>Duration</th><th></th></tr>
+        </thead>
+        <tbody id="history-body"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="options.js"></script>
+</body>
+</html>

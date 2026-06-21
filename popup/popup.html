@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>WebNav</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div id="global-error" class="banner error hidden"></div>
+  <header>
+    <div class="brand">
+      <span class="dot"></span>
+      <strong>WebNav</strong>
+    </div>
+    <div id="profile-indicator" class="profile-indicator" title="Active profile"></div>
+  </header>
+
+  <main>
+    <div id="first-run-banner" class="banner hidden">
+      <strong>First run:</strong> open Options to pick an allowlist mode.
+      <button id="open-options-btn" class="primary small">Open Options</button>
+    </div>
+
+    <div id="redact-banner" class="banner warn hidden">
+      <strong>Secret redaction is off.</strong>
+      <div class="muted" style="margin:4px 0">The model can read page values (including password fields).</div>
+      <div class="row">
+        <button id="open-safety-btn" class="primary small">Enable in Safety</button>
+        <button id="dismiss-redact" class="ghost small">Dismiss</button>
+      </div>
+    </div>
+
+    <section id="task-input-section">
+      <textarea id="goal" placeholder="Describe the task. e.g. Find the cheapest nonstop flight JFK to LAX next Friday and tell me the link."></textarea>
+      <div class="row">
+        <select id="profile-select" title="Profile"></select>
+        <button id="run-btn" class="primary">Run</button>
+      </div>
+      <div class="row secondary">
+        <button id="allow-site-btn" class="ghost small">Allow current site</button>
+        <button id="open-sidebar-btn" class="ghost small">Open sidebar</button>
+        <button id="open-options-btn2" class="ghost small">Settings</button>
+      </div>
+    </section>
+
+    <section id="status-section" class="hidden">
+      <div class="status-row">
+        <div id="status-text">Idle</div>
+        <div id="counter-line" class="muted"></div>
+      </div>
+      <div id="pending-row" class="pending hidden">
+        <span class="badge">1 approval pending</span>
+        <button id="go-sidebar-btn" class="ghost small">Review in sidebar</button>
+      </div>
+      <div class="row">
+        <button id="stop-btn" class="danger">Stop</button>
+      </div>
+    </section>
+
+    <section id="log-section" class="hidden">
+      <h4>Activity</h4>
+      <div id="log" class="log"></div>
+    </section>
+
+    <section id="result-section" class="hidden">
+      <h4>Final answer</h4>
+      <div id="result" class="result"></div>
+    </section>
+  </main>
+
+  <script src="popup.js"></script>
+</body>
+</html>

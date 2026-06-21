@@ -1,0 +1,64 @@
+{
+  "manifest_version": 3,
+  "name": "WebNav — Local AI Browser Agent",
+  "version": "0.1.0",
+  "description": "Drive the browser with open-source AI models (Ollama, LM Studio, vLLM, etc.) via direct API links. Stable element IDs, strict tool parsing, risk-based approvals, domain allowlist, secret redaction.",
+  "minimum_chrome_version": "114",
+  "permissions": [
+    "storage",
+    "tabs",
+    "activeTab",
+    "scripting",
+    "alarms",
+    "sidePanel",
+    "webNavigation",
+    "unlimitedStorage"
+  ],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "WebNav",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "options_page": "options/options.html",
+  "side_panel": {
+    "default_path": "sidebar/sidebar.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "exclude_matches": [
+        "https://chrome.google.com/webstore/*"
+      ],
+      "js": [
+        "content/element-id.js",
+        "content/dom-utils.js",
+        "content/content.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["sidebar/*", "icons/*", "data/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

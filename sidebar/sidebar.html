@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>WebNav Side Panel</title>
+  <link rel="stylesheet" href="sidebar.css" />
+</head>
+<body>
+  <div id="global-error" class="banner error hidden"></div>
+  <header>
+    <div class="brand">
+      <span class="dot"></span>
+      <strong>WebNav</strong>
+      <span id="status-pill" class="pill idle">Idle</span>
+    </div>
+    <div class="head-actions"></div>
+  </header>
+
+  <nav class="tabs">
+    <button data-pane="chat" class="tab active">Chat</button>
+    <button data-pane="activity" class="tab">Activity</button>
+    <button data-pane="approvals" class="tab">Approvals <span id="approvals-count" class="count hidden">0</span></button>
+  </nav>
+
+  <main>
+    <section id="pane-chat" class="pane active chat-pane">
+      <div id="chat-log" class="chat-log"></div>
+      <div id="chat-empty" class="empty">Type a task below to get started (e.g. "open youtube and search for lofi music").</div>
+      <div class="chat-composer">
+        <div class="composer-toolbar">
+          <select id="sidebar-profile-select" class="profile-select-sm" title="Active profile"></select>
+          <a href="#" id="sidebar-open-options" class="settings-link" title="Manage profiles in Options">⚙</a>
+        </div>
+        <div class="composer-input-row">
+          <textarea id="chat-input" rows="1" placeholder="Type a task..." class="composer-input"></textarea>
+          <button id="chat-send" class="primary send-btn" title="Send">➤</button>
+        </div>
+        <div class="composer-footer">
+          <span id="chat-hint" class="muted">Enter to send · Shift+Enter for newline</span>
+        </div>
+      </div>
+    </section>
+    <section id="pane-activity" class="pane">
+      <div class="counters">
+        <span id="counter-line">-</span>
+      </div>
+      <div id="activity-log" class="activity-log"></div>
+    </section>
+    <section id="pane-approvals" class="pane">
+      <div id="approval-list" class="approval-list"></div>
+      <div class="empty" id="approvals-empty">No pending approvals.</div>
+    </section>
+  </main>
+
+  <div id="approval-modal" class="modal hidden" role="dialog">
+    <div class="modal-card">
+      <h3 id="approval-title">Approve action</h3>
+      <div class="approval-meta">
+        <div><strong>Tool:</strong> <code id="approval-tool"></code></div>
+        <div><strong>Risk:</strong> <span id="approval-risk"></span></div>
+        <div><strong>Reason:</strong> <span id="approval-reason"></span></div>
+      </div>
+      <pre id="approval-payload" class="approval-payload"></pre>
+      <div class="approval-actions">
+        <button id="approval-deny" class="ghost">Deny</button>
+        <button id="approval-allow-once" class="primary">Allow once</button>
+        <button id="approval-allow-always" class="primary outline hidden">Allow for this task</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="ask-user-modal" class="modal hidden" role="dialog">
+    <div class="modal-card">
+      <h3>Question from the agent</h3>
+      <p id="ask-user-question"></p>
+      <div id="ask-user-options" class="ask-options"></div>
+      <textarea id="ask-user-text" placeholder="Type your answer"></textarea>
+      <div class="approval-actions">
+        <button id="ask-user-cancel" class="ghost">Cancel</button>
+        <button id="ask-user-send" class="primary">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="sidebar.js"></script>
+</body>
+</html>
