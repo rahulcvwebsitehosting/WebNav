@@ -143,6 +143,10 @@ function broadcastAll(event) {
   // Fallback: also fire runtime.sendMessage for any context that listens that way.
   try { chrome.runtime.sendMessage(event).catch(() => {}); } catch {}
 }
+// Hook: make the agent's _broadcast use broadcastAll so its events
+// (model_message, thinking, tool_executing, tool_result, done, aborted)
+// reach all connected UI ports instead of only runtime.sendMessage listeners.
+self.__webnavBroadcast = broadcastAll;
 
 // --- message API ---
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
@@ -589,9 +593,6 @@ async function handleAskUserAnswer(taskId, answer) {
   try { await agent.handleAskUserAnswer(answer); } catch (e) { console.error('[webnav] handleAskUserAnswer failed', e); }
   scheduleLoop();
 }
-
-// The SW hooks the broadcast function so agent.js can push live events
-// to all connected UI ports. See the module-scope variable below.
 
 function sendMessageError(error) {
   // Best-effort: tell all listeners the request was rejected.
