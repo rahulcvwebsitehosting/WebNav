@@ -81,7 +81,7 @@
   for (const t of document.querySelectorAll('.tab')) {
     t.addEventListener('click', () => {
       for (const x of document.querySelectorAll('.tab')) x.classList.toggle('active', x === t);
-      for (const id of ['profiles', 'allowlist', 'safety', 'snapshots', 'history']) {
+      for (const id of ['profiles', 'allowlist', 'safety', 'snapshots', 'history', 'about']) {
         const pane = $('tab-' + id);
         if (pane) pane.classList.toggle('active', id === t.dataset.tab);
       }
@@ -542,4 +542,30 @@
   }
 
   init();
+
+  // --- About page interactivity ---
+  function spawnStars() {
+    const container = document.getElementById('about-stars');
+    if (!container) return;
+    for (let i = 0; i < 40; i++) {
+      const star = document.createElement('div');
+      star.className = 'about-star';
+      star.style.left = Math.random() * 100 + '%';
+      star.style.top = Math.random() * 100 + '%';
+      star.style.setProperty('--dur', (2 + Math.random() * 3) + 's');
+      star.style.animationDelay = (Math.random() * 5) + 's';
+      star.style.width = star.style.height = (1 + Math.random() * 2) + 'px';
+      container.appendChild(star);
+    }
+  }
+  spawnStars();
+
+  const heart = document.getElementById('about-heart');
+  if (heart) {
+    heart.addEventListener('click', () => {
+      heart.classList.remove('burst');
+      void heart.offsetWidth;
+      heart.classList.add('burst');
+    });
+  }
 })();
