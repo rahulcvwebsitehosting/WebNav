@@ -1,102 +1,140 @@
-# WebNav - Local AI Browser Agent
+<div align="center">
 
-A Chrome extension (Manifest V3) that drives the browser with open-source AI models via direct OpenAI-compatible API endpoints (Ollama, LM Studio, vLLM, llama.cpp server, text-generation-webui).
+# 🌐 WebNav
+**The Local AI Browser Agent for Developers**
 
-## What's new in this build
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Manifest V3](https://img.shields.io/badge/Manifest-V3-blue)](https://developer.chrome.com/docs/extensions/mv3/)
+[![Open Source](https://img.shields.io/badge/Open_Source-Yes-success.svg)](#)
+[![Status: Beta](https://img.shields.io/badge/Status-Beta-orange.svg)](#)
 
-- All UI pages (popup, sidebar, options) are **self-contained classic scripts** with no ES module imports. They will load reliably without depending on Chrome's ES module resolution for `chrome-extension://` pages.
-- The service worker is the only ES module consumer. It uses standard `import` syntax with `type: "module"`.
-- Every UI page shows a **red error banner at the top** if any JS error or unhandled promise rejection occurs, with a console hint.
-- The popup and sidebar **poll** the service worker every 1.5s for the current task. This survives service-worker restarts cleanly - no more "frozen UI after a long task".
-- A default **Ollama profile** is auto-created on first install so the popup and sidebar have something to show immediately.
-- Navigation tools (`navigate`, `open_tab`, `back`, `refresh`, `switch_tab`) now **wait for the tab to finish loading** and take a fresh snapshot before continuing - this is what makes the agent actually work on real pages.
-- The agent gracefully **resumes from `chrome.storage.session`** after a service-worker restart (resume if the previous instance died mid-task).
-- Each tool result that's larger than 8 KB is **truncated in message history** but the full result is kept in the snapshot.
-- A "looks like a final answer" heuristic lets a free-text response terminate the task without requiring the model to emit `finish()` (some smaller models don't reliably call it).
+*Drive your browser completely hands-free using powerful, open-source local AI models.*<br>
+*Built with Manifest V3. No cloud lock-in. No subscription fees. 100% privacy.*
 
-## Install
+</div>
 
-1. Install **Ollama** (you already have `OllamaSetup.exe` in your Downloads). After install, start it: it runs as a background service on Windows.
-2. Pull a tool-capable model:
-   ```
-   ollama pull qwen2.5
-   ```
-   Other good choices: `llama3.1`, `mistral-nemo`, `functionary`, `hermes-3`.
-3. Open `chrome://extensions`, enable **Developer mode** (top right), click **Load unpacked**, and select the `BrowserExt` folder.
-4. The **Options page** opens automatically on first install. The default Ollama profile is pre-seeded. Click **Test connection** in the Profiles tab to confirm.
-5. Pick an allowlist mode. **Allow all non-blocked** is the most permissive starting point.
-6. Pin the extension, click the icon, type a task. Open the side panel (toolbar side-panel icon) to watch the agent work and approve R2/R3 actions.
+---
 
-## Architecture
+## ⚡ What is WebNav?
 
+WebNav is a developer-friendly Chrome Extension that turns open-source AI models (via Ollama, LM Studio, vLLM) into autonomous browsing agents. You give it a high-level task, and it clicks, types, scrolls, and extracts data to accomplish it on your behalf. 
+
+Because it connects directly to local OpenAI-compatible endpoints, **your browsing data never leaves your machine.**
+
+### Why Developers Love It
+- **Zero Dependencies**: Pure Vanilla JS, no build steps, no React/Webpack bloat. 
+- **Manifest V3 Native**: Resilient service-worker architecture that survives aggressive browser suspension.
+- **Transparent Execution**: Watch the AI "think" and interact in real-time through the side panel.
+- **Hackable**: Easy to add custom tools or tweak the parser logic for different LLMs.
+
+---
+
+## 🚀 Use Cases
+
+| 🕵️‍♂️ Research & Summarization | 🛠️ QA & Automation | 📊 Data Extraction | 🔒 Privacy-First Tasks |
+| :--- | :--- | :--- | :--- |
+| "Search for the latest papers on Transformer models and summarize the top 3." | "Go to my staging site, login with user/pass, and verify the checkout button works." | "Open Amazon, search for 34-inch monitors, and list the top 5 prices." | "Read this internal company document and draft an email response." |
+
+---
+
+## 🧠 How It Works (Architecture Flow)
+
+```mermaid
+graph TD
+    User([👤 User Request]) -->|Types goal in Sidebar| UI[🖥️ Extension UI]
+    UI -->|Starts Task| SW{⚙️ Service Worker}
+    
+    subgraph Browser Context
+        SW -->|1. Takes DOM Snapshot| ContentScript[📄 Content Script]
+        ContentScript -->|2. Maps Elements to IDs| DOM[🌐 Live Web Page]
+        DOM -->|Returns Context| SW
+    end
+    
+    subgraph AI Engine
+        SW -->|3. Prompts Model| LLM[(🤖 Local LLM)]
+        LLM -->|4. Emits Tool Call| Parser[🔍 Tool Parser]
+        Parser -->|5. Validates Action| SW
+    end
+    
+    SW -->|6. Executes Tool| ContentScript
+    ContentScript -->|Clicks, Types, Scrolls| DOM
+    
+    style User fill:#f5a623,stroke:#333,stroke-width:2px,color:#000
+    style LLM fill:#4f9cf9,stroke:#333,stroke-width:2px,color:#fff
+    style SW fill:#22c55e,stroke:#333,stroke-width:2px,color:#fff
 ```
-BrowserExt/
-├── manifest.json
-├── background/
-│   └── service-worker.js     # Agent loop, snapshot cache, ports, resume
-├── content/                  # Injected into pages
-│   ├── element-id.js         # Per-snapshot stable IDs
-│   ├── dom-utils.js          # Click/type/scroll/extract
-│   └── content.js            # Message router
-├── popup/                    # Task entry, self-contained
-├── sidebar/                  # Live activity, approvals, self-contained
-├── options/                  # 5-tab settings, self-contained
-├── lib/                      # ES modules, used by service worker only
-│   ├── ai-client.js          # OpenAI-compatible chat
-│   ├── agent.js              # ReAct loop with abort()
-│   ├── parser.js             # Strict text-tool parser
-│   ├── risk.js               # R0..R4 classifier
-│   ├── allowlist.js          # URL checks + builtin categories
-│   ├── psl.js                # Public Suffix List loader
-│   ├── secret-redact.js      # Per-rule secret redaction
-│   ├── prompt-defense.js     # Sanitization + injection patterns
-│   ├── tools.js              # 14 tool schemas + validator
-│   ├── storage.js            # chrome.storage wrappers
-│   └── usage.js              # Cost accounting
-└── data/
-    ├── psl.txt               # Bundled PSL (minimal)
-    └── deny-categories.json  # Built-in protected domains
+
+---
+
+## ⚙️ Getting Started
+
+### 1. Requirements
+- **Chrome** (version 114+)
+- **Local AI Provider**: [Ollama](https://ollama.com/) (recommended), LM Studio, or vLLM.
+
+### 2. Installation
+1. Pull a tool-capable model (e.g., `ollama pull qwen2.5`).
+2. Open `chrome://extensions` in your browser.
+3. Enable **Developer mode** (top right toggle).
+4. Click **Load unpacked** and select the downloaded `BrowserExt` folder.
+
+### 3. Setup
+1. The **Options page** will open automatically.
+2. Ensure the **Base URL** points to your local server (e.g., `http://localhost:11434/v1` for Ollama).
+3. Click **Test connection** to verify the extension can see your models.
+4. Pin the extension to your toolbar, open the **Side Panel**, type a goal, and watch the magic!
+
+---
+
+## 🎯 Recommended Settings & Models
+
+Not all models are good at driving browsers. The model *must* understand function calling / tool usage.
+
+**Top Tier Models (Local):**
+- 🥇 `qwen2.5` / `qwen2.5-coder` (Fast, incredibly accurate tool use)
+- 🥈 `llama3.1` (Reliable, great reasoning)
+- 🥉 `mistral-nemo` or `hermes-3`
+
+**Extension Settings (Options Page):**
+- **Allowlist Mode**: Start with `"Allow all non-blocked"` for the smoothest experience. 
+- **Confirmation Mode**: Leave on `"Destructive Only"` — the AI will browse freely but ask for permission before clicking "Buy", "Submit", or downloading files.
+
+---
+
+## 🛡️ Built-in Safety Model
+
+WebNav is designed to keep you safe from rogue AI actions and malicious websites (Prompt Injection).
+
+- **Risk Tiers (R0 - R4)**: Every action is classified. Reading (R0) and clicking links (R1) happen instantly. Submitting forms (R3) always requires your explicit click-to-approve. File downloads (R4) are blocked entirely.
+- **Domain Blacklist**: Hardcoded blocklists prevent the AI from navigating to banking, medical, or cloud-console domains unless you explicitly authorize it.
+- **Prompt Defense**: Strips invisible Unicode characters from pages to prevent invisible prompt injection attacks.
+- **Secret Redaction**: (Opt-in) Automatically redacts Social Security Numbers, API keys, and credit cards from the HTML before sending it to the LLM.
+
+---
+
+## 🛠️ The 14 Developer Tools
+
+The agent interacts with the page using a highly restrictive, deterministic toolset.
+
+```json
+[
+  "navigate(url)", "open_tab(url)", "switch_tab(tabId)",
+  "read_page()", "extract_text(id)", "scroll(dir, amt)", 
+  "wait_for(selector, timeout)", "refresh()", "back()",
+  "click(id)", "type_text(id, text)", "press_key(key)", 
+  "ask_user(question)", "finish(answer)"
+]
 ```
 
-## The 14 tools
+## 🤝 Contributing (Open Source)
 
-1. `navigate(url, risk_reason?)` - Go to a URL in the current tab
-2. `open_tab(url, risk_reason?)` - Open a new tab
-3. `switch_tab(tabId)` - Make a different tab active
-4. `read_page(max?, offset?)` - Get the current page's interactive elements
-5. `click(id, risk_reason?)` - Click the element with the given ID
-6. `type_text(id, text, pressEnter?, risk_reason?)` - Type into a field
-7. `press_key(key, risk_reason?)` - Press a keyboard key
-8. `scroll(direction, amount)` - Scroll the page
-9. `extract_text(id?, max?, offset?)` - Read text content
-10. `wait_for(selector|id|text, timeout)` - Wait for an element
-11. `back()` - Go back in browser history
-12. `refresh(bypassCache?)` - Reload the current page
-13. `ask_user(question, options?)` - Pause and ask the user
-14. `finish(answer)` - Mark the task complete
+WebNav is 100% open source. We welcome pull requests!
 
-## Safety model
+**Good First Issues:**
+- Adding new models to the prompt parser.
+- Enhancing the DOM scraper to understand Shadow DOMs.
+- Adding custom CSS themes for the Side Panel.
 
-- **Built-in deny list**: 7 categories (banking, payment, crypto, government, medical, identity, cloud-console). Override requires typing the category name.
-- **R0/R1 auto-execute**, **R2** configurable, **R3 always requires approval**, **R4 blocked outright**.
-- **R3 timeouts abort the task** (no retry in a different way).
-- **Secret redaction**: off by default, per-rule opt-in in Safety tab.
-- **Prompt-injection defense**: invisible-character stripping, pattern filter, untrusted-page wrapper, accumulated-hit warning.
-- **Loop detection**: same action 3+ times, or a 4-action sequence repeated 2+ times. Configurable.
+## 📄 License
 
-## Troubleshooting
-
-- **"Failed to fetch" / connection fails**: this is a network-level error, not an auth error — the server couldn't be reached.
-  - **Local Ollama**: confirm Ollama is running. In a terminal run `curl http://localhost:11434/v1/models`. The Base URL must be `http://localhost:11434/v1` and **needs no API key**.
-  - **Ollama Cloud** (key shaped like `3db37b…​.cPJ40…`): the Base URL must be **`https://ollama.com/v1`** (OpenAI-compatible). Paste your key into the API key field. Do **not** use `https://ollama.com/api/v1` — that path does not exist.
-- **HTTP 401/403 from cloud**: the Base URL is right but the API key is wrong, expired, or has no cloud-model access. Regenerate the key on ollama.com.
-- **Test connection fails**: confirm Ollama is running. Open a terminal and run `curl http://localhost:11434/v1/models` - it should return a list of models.
-- **Model emits invalid actions**: 3 parse errors abort the task. Try a tool-capable model (qwen2.5, llama3.1, mistral-nemo).
-- **Side panel won't open**: Chrome 114+ has the side panel; click the side-panel icon in the toolbar (not the WebNav extension icon).
-- **"another_task_running" error**: stop the previous task with the Stop button in the popup.
-- **Service worker restarts frequently**: this is normal in MV3. Agent state is persisted to `chrome.storage.session` and resumes automatically. The popup/sidebar poll every 1.5s for updates.
-- **A red error banner appears at the top of a UI page**: open DevTools (F12 or right-click > Inspect) for that page; the JS error is logged to console with a stack trace.
-
-## License
-
-MIT.
+This project is licensed under the **MIT License**. Build on top of it, modify it, and make the web yours.
